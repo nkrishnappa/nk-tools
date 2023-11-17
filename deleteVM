@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Check if at least one argument is provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <instance_name1> [<instance_name2> ...]"
+    exit 1
+fi
+
+# Loop through each instance name provided as an argument
+for instance_name in "$@"; do
+    # Destroy the virtual machine
+    virsh destroy "$instance_name"
+
+    # Undefine and remove all storage associated with the virtual machine
+    virsh undefine "$instance_name" --remove-all-storage
+
+    # Print a message for each instance processed
+    echo "Instance '$instance_name' destroyed and removed."
+done
+
+echo "All specified instances have been destroyed and removed."
+

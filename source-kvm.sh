@@ -28,26 +28,23 @@ function getMemoryInfo() {
 }
 
 function deleteVM() {
-  # Check if the VM exists
-  if ! virsh dominfo $1; then
-    echo "VM $1 does not exist."
-    return
-  fi
+# Check if at least one argument is provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <instance_name1> [<instance_name2> ...]"
+    exit 1
+fi
 
-  # Log that the VM is being deleted to the console
-  echo "Deleting VM $1"
+# Loop through each instance name provided as an argument
+for instance_name in "$@"; do
+    # Destroy the virtual machine
+    virsh destroy "$instance_name"
 
-  # Stop the VM if it is running
-  if virsh domstate $1 | grep running; then
-    virsh destroy $1
-  fi
+    # Undefine and remove all storage associated with the virtual machine
+    virsh undefine "$instance_name" --remove-all-storage
 
-  # Log that the VM has been stopped to the console
-  echo "VM $1 has been stopped"
+    # Print a message for each instance processed
+    echo "Instance '$instance_name' destroyed and removed."
+done
 
-  # Undefine the VM with the `--remove-all-storage` option to delete all of its associated storage
-  virsh undefine $1 --remove-all-storage
-
-  # Log that the VM has been undefined to the console
-  echo "VM $1 has been undefined"
+echo "All specified instances have been destroyed and removed."
 }
